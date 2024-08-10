@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"io/ioutil"
 	"os"
 )
 
@@ -17,7 +15,7 @@ type EditorFrame struct {
 	labelCurrentLine   *widget.Label
 	labelCurrentColumn *widget.Label
 	labelCurrentIndex  *widget.Label
-	editor             *widget.Entry
+	editor             *TextEditorPanel
 	file               *os.File
 	charset            string
 	needSave           bool
@@ -33,8 +31,7 @@ func NewEditorFrame(a fyne.App) *EditorFrame {
 	frame.labelCurrentLine = widget.NewLabel("")
 	frame.labelCurrentColumn = widget.NewLabel("")
 	frame.labelCurrentIndex = widget.NewLabel("")
-	frame.editor = widget.NewMultiLineEntry()
-	frame.editor.Wrapping = fyne.TextWrapWord
+	frame.editor = NewTextEditorPanel()
 
 	// Setup the main window
 	frame.window = a.NewWindow("GigaNotePad")
@@ -59,7 +56,10 @@ func NewEditorFrame(a fyne.App) *EditorFrame {
 func (frame *EditorFrame) setupMenu() {
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("File",
-			fyne.NewMenuItem("New", func() { frame.newDocument() }),
+			fyne.NewMenuItem("New", func() {
+				doc := NewDocument()
+				frame.showNewEditor(doc)
+			}),
 			fyne.NewMenuItem("Open", func() { frame.openFile() }),
 			fyne.NewMenuItem("Save", func() { frame.saveFile() }),
 			fyne.NewMenuItemSeparator(),
@@ -74,11 +74,8 @@ func (frame *EditorFrame) setupMenu() {
 	frame.window.SetMainMenu(menu)
 }
 
-func (frame *EditorFrame) newDocument() {
-	frame.editor.SetText("")
-	frame.labelFileName.SetText("New Document")
-	frame.file = nil
-	frame.needSave = false
+func (frame *EditorFrame) showNewEditor(doc *Document) {
+	// TODO
 }
 
 func (frame *EditorFrame) openFile() { /**
@@ -107,14 +104,15 @@ func (frame *EditorFrame) saveFile() {
 		frame.saveFileAs()
 		return
 	}
-
-	data := []byte(frame.editor.Text)
-	err := ioutil.WriteFile(frame.file.Name(), data, 0644)
+	/**
+	err := frame.editor.GetDocument().Save()
 	if err != nil {
 		widget.ShowPopUp(widget.NewLabel(fmt.Sprintf("Error saving file: %v", err)), frame.window.Canvas())
 	} else {
 		frame.needSave = false
 	}
+
+	*/
 }
 
 func (frame *EditorFrame) saveFileAs() { /**
